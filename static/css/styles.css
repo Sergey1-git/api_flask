@@ -1,0 +1,4 @@
+.horizontal-list li {
+    display: inline-block; /* Располагает элементы в одной строке */
+    margin-right: 15px; /* Добавляет отступ между элементами */
+}
