@@ -36,7 +36,6 @@ def correct_interval(date1, date2):
     else:
         return False
 
-
 global result_period
 result_period = pd.DataFrame()
 
