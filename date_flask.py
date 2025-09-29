@@ -7,7 +7,7 @@ try:
     df = pd.read_csv('date.csv',header=0, encoding='utf-8')
     print("Файл успешно прочитан")
 except FileNotFoundError:
-    print("Ошибка: Файл 'my_data.csv' не найден. Проверьте путь и имя файла.")
+    print("Ошибка: Файл 'my_date.csv' не найден. Проверьте путь и имя файла.")
 except Exception as e:
     print(f"Произошла ошибка при чтении файла: {e}")
 
