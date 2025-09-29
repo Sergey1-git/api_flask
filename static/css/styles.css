@@ -2,3 +2,17 @@
     display: inline-block; /* Располагает элементы в одной строке */
     margin-right: 15px; /* Добавляет отступ между элементами */
 }
+
+.pagination {
+ display: flex;      /* Включить Flexbox */
+ list-style: none;  /* Убрать маркеры списка */
+ padding: 0;        /* Убрать стандартный отступ списка */
+ gap: 10px;         /* Добавить отступ между элементами */
+ color: red;
+}
+
+.color-red{
+color: red;}
+
+.color-blue{
+color: blue;}

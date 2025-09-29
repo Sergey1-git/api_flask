@@ -4,7 +4,6 @@ from datetime import datetime
 from datetime import timedelta
 
 try:
-    # Попробуйте прочитать CSV-файл
     df = pd.read_csv('date.csv',header=0, encoding='utf-8')
     print("Файл успешно прочитан")
 except FileNotFoundError:
@@ -18,8 +17,9 @@ df['Price'] = pd.to_numeric(df['Price'], errors='coerce')
 df=df.sort_values(by='Datetime')
 df=df.reset_index(drop=True)
 
-
+# Функция подготовки  данных для функций time и period.
 def data_flask(date1, date2=None):
+    # Для функции time.
     if date2 is None:
         value_day_minute = datetime.strptime(date1, "%d.%m.%Y %H:%M")
         value_day_minute_min = datetime.strptime(date1, "%d.%m.%Y %H:%M") - timedelta(minutes=2.1)
@@ -33,3 +33,9 @@ def data_flask(date1, date2=None):
         else:
             day_minute_one = day_minute_one.to_html()
             return day_minute_one
+    # Для функции period.
+    else:
+        value_day_minute_min1 = datetime.strptime(date1, "%d.%m.%Y %H:%M")
+        value_day_minute_max2 = datetime.strptime(date2, "%d.%m.%Y %H:%M")
+        day_minute = df[(df['Datetime'] > value_day_minute_min1) & (df['Datetime'] < value_day_minute_max2)]
+        return day_minute
