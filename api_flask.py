@@ -4,11 +4,14 @@ from date_flask import data_flask
 import re
 from datetime import datetime
 from flask_paginate import Pagination, get_page_args
+import  os
+from dotenv import load_dotenv
 
 
 app = Flask(__name__)
 
-app.config['SECRET_KEY'] = 'gdgas43gdfgfgs46hfg6hf7gh9f'
+load_dotenv()
+app.config['SECRET_KEY'] =os.environ.get('SECRET_KEY')
 
 # Ссылки на страницы.
 menu = [{"name": "Главная страница", "url": "/"},
@@ -18,23 +21,18 @@ menu = [{"name": "Главная страница", "url": "/"},
 
 # Функция выполняе проверку корректности  заполнения полей ввода даты и времени.
 def correct_input(string):
-    if 15<=len(string)<=16:
-        is_valid = re.search (r"[0-2]{1}\d{1}\.[0-1]{1}\d{1}\.2025\s[0-2]?[0-9]{1}:[0-5]{1}[0-9]{1,1}$", string)
-        if is_valid:
-            return True
-        else:
-            return False
-    else:
+    date_format = "%d.%m.%Y %H:%M"
+    try:
+        datetime.strptime(string, date_format)
+        return True
+    except ValueError:
         return False
 
 # Функция выполняе проверку, что дата и время начала периода больше даты и времени конца периода.
 def correct_interval(date1, date2):
     date1 = datetime.strptime(date1, "%d.%m.%Y %H:%M")
     date2 = datetime.strptime(date2, "%d.%m.%Y %H:%M")
-    if date1 < date2:
-        return True
-    else:
-        return False
+    return date1 < date2
 
 global result_period
 result_period = pd.DataFrame()
@@ -76,9 +74,7 @@ def period():
                 if correct_input(date2) is True:
                     if correct_interval(date1, date2) is True:
                         global result_period
-                        print('V',len(result_period))
                         result_period = data_flask(date1, date2)
-                        print('V', len(result_period))
                     else:
                         flash(f'Значение  {date1} в поле "Начало периода" больше значения {date2} в поле "Конец периода"'
                               f', повторите ввод.')

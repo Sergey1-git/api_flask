@@ -11,7 +11,6 @@ except FileNotFoundError:
 except Exception as e:
     print(f"Произошла ошибка при чтении файла: {e}")
 
-df = pd.read_csv('date.csv',header=0)
 df['Datetime'] = pd.to_datetime(df['Datetime'], format='%Y-%m-%d %H:%M')
 df['Price'] = pd.to_numeric(df['Price'], errors='coerce')
 df=df.sort_values(by='Datetime')
