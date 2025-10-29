@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{{ super() }}
+<h3>Введите данные начала и конца периода в формате 17.09.2025 08:15</h3>
+<form action="/period" method="post" class="form-contact">
+<p><label>Начало периода:</label> <input type="text" name="date1" value="" />
+<p><label>Конец периода:</label> <input type="text" name="date2" value="" />
+<p><input type="submit" value="Запросить данные" />
+
+{% for msg in get_flashed_messages() %}
+<div class="flash">{{msg}}</div>
+{% endfor %}
+
+<table>
+{{ result | safe }}
+</table>
+</form>
+
+{% if n ==1 %}
+<table>
+    <h3>Запрошенные данные</h3>
+        <thead>
+            <tr>
+                <th>  Name</th>
+                <th>  Price  </th>
+                <th>  Datetime</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for index, row in items.iterrows() %}
+            <tr>
+                <td>{{ row.Name }}</td>
+                <td class="color-red">{{ row.Price }}</td>
+                <td class="color-blue">{{ row.Datetime }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{{pagination.links}}
+{% endif %}
+{% endblock %}
