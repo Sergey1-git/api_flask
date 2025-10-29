@@ -80,11 +80,8 @@ def period():
 
     if 'referer' in request.headers:
         if '/period' not in request.headers['referer']:
-            print('Yes')
             if 'visits' not in session:
-                print('not in session')
                 session['visits'] = next(generator_session)
-                print('session visits gen', session['visits'])
                 dict_visits_session[session['visits']] = 0
             return render_template('period.html', title="Запрос данных по периоду.", menu=menu,
                                    items=None)
