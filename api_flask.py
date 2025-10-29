@@ -1,7 +1,6 @@
 import pandas as pd
-from flask import Flask, render_template, url_for,request, flash
+from flask import Flask, render_template, url_for, request, flash, session
 from date_flask import data_flask
-import re
 from datetime import datetime
 from flask_paginate import Pagination, get_page_args
 import  os
@@ -10,8 +9,9 @@ from dotenv import load_dotenv
 
 app = Flask(__name__)
 
-load_dotenv()
-app.config['SECRET_KEY'] =os.environ.get('SECRET_KEY')
+dict_result_period={}
+dict_visits_session={}
+
 
 # Ссылки на страницы.
 menu = [{"name": "Главная страница", "url": "/"},
@@ -34,21 +34,15 @@ def correct_interval(date1, date2):
     date2 = datetime.strptime(date2, "%d.%m.%Y %H:%M")
     return date1 < date2
 
-global result_period
-result_period = pd.DataFrame()
 
 
 @app.route("/",methods=['GET'])
 def index():
-    global result_period
-    result_period = pd.DataFrame()
     return render_template('index.html',title="О сайте", menu=menu)
 
 
 @app.route("/time" , methods=['GET','POST'])
 def time():
-    global result_period
-    result_period = pd.DataFrame()
     result_time = ''
     if request.method == 'POST':
         date1 = request.form['date1']
@@ -65,7 +59,6 @@ def time():
 
 @app.route("/period" , methods=['GET','POST'])
 def period():
-    n = 0
     if request.method=='POST':
         date1 = request.form['date1']
         date2 = request.form['date2']
@@ -73,8 +66,8 @@ def period():
             if correct_input(date1) is True :
                 if correct_input(date2) is True:
                     if correct_interval(date1, date2) is True:
-                        global result_period
                         result_period = data_flask(date1, date2)
+                        dict_result_period[session['visits']] = result_period
                     else:
                         flash(f'Значение  {date1} в поле "Начало периода" больше значения {date2} в поле "Конец периода"'
                               f', повторите ввод.')
@@ -85,17 +78,36 @@ def period():
         else:
             flash('Одно или оба поля ввода данных не заполнены.')
 
-    if result_period.empty:
-        return render_template('period.html', title="Запрос данных по периоду.", menu=menu, items=None)
-    else:
-        n = 1
-        page, per_page, offset = get_page_args(page=1, per_page_count=10,  # Количество элементов на странице
-                                           path=url_for('period'))  # Путь для ссылок пагинации
-        items_on_page = result_period[offset:offset + per_page]
-        pagination = Pagination(page=page, per_page=per_page, total=len(result_period),
+    if 'referer' in request.headers:
+        if '/period' not in request.headers['referer']:
+            print('Yes')
+            if 'visits' not in session:
+                print('not in session')
+                session['visits'] = next(generator_session)
+                print('session visits gen', session['visits'])
+                dict_visits_session[session['visits']] = 0
+            return render_template('period.html', title="Запрос данных по периоду.", menu=menu,
+                                   items=None)
+        else:
+            n = 1
+            page, per_page, offset = get_page_args(page=1, per_page_count=10,  # Количество элементов на странице
+                                               path=url_for('period'))  # Путь для ссылок пагинации
+            items_on_page = dict_result_period[session['visits']][offset:offset + per_page]
+            pagination = Pagination(page=page, per_page=per_page, total=len(dict_result_period[session['visits']]),
                                 css_framework='Bootstrap5')  # Или другой фреймворк CSS
-        return render_template('period.html', title="Запрос данных по периоду.", menu=menu,
+            return render_template('period.html', title="Запрос данных по периоду.", menu=menu,
                                items=items_on_page, pagination=pagination, n=n)
+    else:
+        return render_template('period.html', title="Запрос данных по периоду.", menu=menu, items=None)
+
+def session_generator():
+    n = 122
+    while True:
+        yield n
+        n += 1
+generator_session = session_generator()
 
 if __name__ == "__main__":
+    load_dotenv()
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
     app.run(debug=True)
